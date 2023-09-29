@@ -4,6 +4,7 @@ import os
 import pyautogui
 import time
 import pydirectinput
+from nodejs import node
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,6 +17,9 @@ fin_tour_button = 'fin_tour.png'
 menu_button = 'menu_button.png'
 abandoneer_button = 'abandonner_button.png'
 confirm_abandon_button = 'confirm_abandon_button.png'
+heart_img = 'heart.png'
+sword_img = 'sword.png'
+
 
 # spells image names
 spell_eau_2          = 'spell_eau_2_minimal.png'
@@ -36,6 +40,10 @@ wait_to_play = 7  # in seconds
 
 # chack setup
 board_setup = 0
+number_of_six = 0
+number_of_four = 0
+number_of_two = 0
+number_of_kartana = 0
 
 # position on screen
 start_position = {'x': 775, 'y': 659}
@@ -48,7 +56,7 @@ last_square = {'x': 892, 'y': 469}
 
 
 def detect(object_to_find):
-    object_to_find_coordinates = pyautogui.locateOnScreen(default_path + object_to_find, confidence=0.9)
+    object_to_find_coordinates = pyautogui.locateOnScreen(default_path + object_to_find, confidence=0.9, grayscale=False)
     if object_to_find_coordinates is None:
         return 0
     else :
@@ -88,10 +96,10 @@ def detect_board_setup_turns():
     global board_setup
     hand = make_board()
     print(hand)
-    number_of_six = 0
-    number_of_four = 0
-    number_of_two = 0
-    number_of_kartana = 0
+    global number_of_six
+    global number_of_four
+    global number_of_two
+    global number_of_kartana
     for card in hand:
         match card:
             case 'spell_eau_6_minimal.png':
@@ -143,6 +151,8 @@ def detect_board_setup_turns():
 
 def detect_second_setup():
     hand = make_board()
+    global number_of_two
+    global number_of_kartana
     number_of_two = 0
     number_of_kartana = 0
     for card in hand:
@@ -164,28 +174,193 @@ def detect_second_setup():
 
 
 def play_first_turn():
+    print("FIRST TURN")
+    global number_of_six
+    global number_of_four
+    global number_of_two
+    global number_of_kartana
     # move character
-    print("im here")
-    print(int(start_position['x']))
-    print(start_position['x'])
-    pyautogui.moveTo(start_position['x'], start_position['y'])
-    pyautogui.click()
-    print("im here 2")
-    pyautogui.dragTo(first_movement_end['x'], first_movement_end['y'], 1, button='left')
-    print("im here 3")
+    node.run(['move/index.js', str(start_position['x']), str(start_position['y']), str(first_movement_end['x']), str(first_movement_end['y'])])
+    if number_of_six >= 1:
+        print("launching spell 6")
+        # launch spell 6
+        test = detect_move_click(spell_feu_6, spell_feu_6)
+        if test == 1:
+            detect_move_click(spell_eau_6, spell_eau_6)
+        pyautogui.moveTo(first_square['x'], first_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+        pyautogui.moveTo(second_square['x'], second_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+    elif number_of_four >= 1:
+        print("launching spell 4")
+        test = detect_move_click(spell_vent_4, spell_vent_4)
+        if test == 1:
+            detect_move_click(spell_terre_4, spell_terre_4)
+        pyautogui.moveTo(first_square['x'], first_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+        test = detect_move_click(spell_feu_2, spell_feu_2)
+        if test ==1:
+            test = detect_move_click(spell_eau_2, spell_eau_2)
+            if test == 1:
+                test = detect_move_click(spell_vent_2, spell_vent_2)
+                if test == 1:
+                    detect_move_click(spell_terre_2, spell_terre_2)
+        pyautogui.moveTo(second_square['x'], second_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+    else :
+        print("launching spell 2")
+        test = detect_move_click(spell_feu_2, spell_feu_2)
+        if test == 1:
+            test = detect_move_click(spell_eau_2, spell_eau_2)
+            if test == 1:
+                test = detect_move_click(spell_vent_2, spell_vent_2)
+                if test == 1:
+                    detect_move_click(spell_terre_2, spell_terre_2)
+        pyautogui.moveTo(first_square['x'], first_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+        test = detect_move_click(spell_feu_2, spell_feu_2)
+        if test == 1:
+            test = detect_move_click(spell_eau_2, spell_eau_2)
+            if test == 1:
+                test = detect_move_click(spell_vent_2, spell_vent_2)
+                if test == 1:
+                    detect_move_click(spell_terre_2, spell_terre_2)
+        pyautogui.moveTo(second_square['x'], second_square['y'])
+        pydirectinput.mouseDown()
+        time.sleep(.1)
+        pydirectinput.mouseUp()
+        time.sleep(0.5)
+    print("END FIRST TURN")
+    detect_move_click(fin_tour_button, fin_tour_button)
+    time.sleep(enemy_turn)
 
 
 def play_second_turn():
-    print("second turn")
+    print("SECOND TURN")
+    detect_move_click(spell_fureur_kartana, spell_fureur_kartana)
+    pyautogui.moveTo(first_movement_end['x'], first_movement_end['y'])
+    pydirectinput.mouseDown()
+    time.sleep(.1)
+    pydirectinput.mouseUp()
+    time.sleep(0.5)
+    pyautogui.dragTo(third_square['x'], third_square['y'])
+    #pydirectinput.mouseDown()
+    #time.sleep(.1)
+    #pydirectinput.mouseUp()
+    time.sleep(2)
+    test = detect(heart_img)
+    test2 = detect(sword_img)
+    if test == 1 or test2 == 1:
+        launch_setup_path()
+    else:
+        launch_setup_square()
+
+
+def launch_setup_path():
+    print("setup path")
+    test = detect_move_click(spell_feu_2, spell_feu_2)
+    if test == 1:
+        test = detect_move_click(spell_eau_2, spell_eau_2)
+        if test == 1:
+            test = detect_move_click(spell_vent_2, spell_vent_2)
+            if test == 1:
+                detect_move_click(spell_terre_2, spell_terre_2)
+    pyautogui.moveTo(last_square['x'], last_square['y'])
+    pydirectinput.mouseDown()
+    time.sleep(.1)
+    pydirectinput.mouseUp()
+    time.sleep(0.5)
+    test = detect_move_click(spell_feu_2, spell_feu_2)
+    if test == 1:
+        test = detect_move_click(spell_eau_2, spell_eau_2)
+        if test == 1:
+            test = detect_move_click(spell_vent_2, spell_vent_2)
+            if test == 1:
+                detect_move_click(spell_terre_2, spell_terre_2)
+    pyautogui.moveTo(fourth_square['x'], fourth_square['y'])
+    pydirectinput.mouseDown()
+    time.sleep(.1)
+    pydirectinput.mouseUp()
+    time.sleep(0.5)
+    node.run(['move/index.js', str(first_movement_end['x']), str(first_movement_end['y']), str(fourth_square['x']),
+              str(fourth_square['y'])])
+    node.run(['move/index.js', str(fourth_square['x']), str(fourth_square['y']), str(second_square['x']),
+              str(second_square['y'])])
+    node.run(['move/index.js', str(second_square['x']), str(second_square['y']), str(first_square['x']),
+              str(first_square['y'])])
+    node.run(['move/index.js', str(first_square['x']), str(first_square['y']), str(last_square['x']),
+              str(last_square['y'])])
+
+
+def launch_setup_square():
+    print("setup square")
+    test = detect_move_click(spell_feu_2, spell_feu_2)
+    if test == 1:
+        test = detect_move_click(spell_eau_2, spell_eau_2)
+        if test == 1:
+            test = detect_move_click(spell_vent_2, spell_vent_2)
+            if test == 1:
+                detect_move_click(spell_terre_2, spell_terre_2)
+    pyautogui.moveTo(third_square['x'], third_square['y'])
+    pydirectinput.mouseDown()
+    time.sleep(.1)
+    pydirectinput.mouseUp()
+    time.sleep(0.5)
+    test = detect_move_click(spell_feu_2, spell_feu_2)
+    if test == 1:
+        test = detect_move_click(spell_eau_2, spell_eau_2)
+        if test == 1:
+            test = detect_move_click(spell_vent_2, spell_vent_2)
+            if test == 1:
+                detect_move_click(spell_terre_2, spell_terre_2)
+    pyautogui.moveTo(fourth_square['x'], fourth_square['y'])
+    pydirectinput.mouseDown()
+    time.sleep(.1)
+    pydirectinput.mouseUp()
+    time.sleep(0.5)
+    node.run(['move/index.js', str(first_movement_end['x']), str(first_movement_end['y']), str(third_square['x']),
+              str(third_square['y'])])
+    node.run(['move/index.js', str(third_square['x']), str(third_square['y']), str(first_square['x']),
+              str(first_square['y'])])
+    node.run(['move/index.js', str(first_square['x']), str(first_square['y']), str(second_square['x']),
+              str(second_square['y'])])
+    node.run(['move/index.js', str(second_square['x']), str(second_square['y']), str(fourth_square['x']),
+              str(fourth_square['y'])])
+
 
 
 def launch_abandon():
+    global board_setup
+    global number_of_six
+    global number_of_four
+    global number_of_two
+    global number_of_kartana
     detect_move_click(menu_button, "menu button")
     time.sleep(.5)
     detect_move_click(abandoneer_button, "abandon_button")
     time.sleep(.5)
     detect_move_click(confirm_abandon_button, "oui button")
     time.sleep(4)
+    board_setup = 0
+    number_of_six = 0
+    number_of_four = 0
+    number_of_two = 0
+    number_of_kartana = 0
 
 
 while True:
@@ -214,6 +389,6 @@ while True:
         if setup != 0:
             launch_abandon()
             continue
-    time.sleep(enemy_turn)
     play_second_turn()
+    launch_abandon()
     board_setup = 0
